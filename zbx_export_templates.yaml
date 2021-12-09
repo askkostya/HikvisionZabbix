@@ -1,0 +1,171 @@
+zabbix_export:
+  version: '5.4'
+  date: '2021-12-09T22:29:33Z'
+  groups:
+    -
+      uuid: 7df96b18c230490a9a0a9e2307226338
+      name: Templates
+  templates:
+    -
+      uuid: 334af421ea3f47258cb79fab1c484317
+      template: HikvisionTemplates
+      name: 'Hikvision Templates'
+      groups:
+        -
+          name: Templates
+      discovery_rules:
+        -
+          uuid: bfdbd39dfd094b4db6c4b7b9e0a9ff9b
+          name: CAM
+          type: ZABBIX_ACTIVE
+          key: 'camid.discovery[CAM]'
+          delay: 30m
+          lifetime: 1w
+          item_prototypes:
+            -
+              uuid: 2088131d80524ef4a99cfc3715fa43f7
+              name: '{#NVRID} канал {#DEVICEID} имя {#DEVICENAME} (подключена?)'
+              type: ZABBIX_ACTIVE
+              key: 'camid.status[{#NVRID},chanDetectResult,{#DEVICEID}]'
+              delay: 1h
+              history: 3d
+              trends: '0'
+              value_type: TEXT
+              request_method: POST
+            -
+              uuid: 3bea1321e79049d88876f985495cbaec
+              name: '{#NVRID} канал {#DEVICEID} имя {#DEVICENAME} (IP)'
+              type: ZABBIX_ACTIVE
+              key: 'camid.status[{#NVRID},ipAddress,{#DEVICEID}]'
+              delay: 1h
+              history: 3d
+              trends: '0'
+              value_type: TEXT
+              request_method: POST
+            -
+              uuid: 8208e0ca213d4e8da2714b2d92626f24
+              name: '{#NVRID} канал {#DEVICEID} имя {#DEVICENAME} (онлайн?)'
+              type: ZABBIX_ACTIVE
+              key: 'camid.status[{#NVRID},online,{#DEVICEID}]'
+              delay: 1h
+              history: 3d
+              trends: '0'
+              value_type: TEXT
+              request_method: POST
+              trigger_prototypes:
+                -
+                  uuid: a00afd18a02f4d8f8cb0e307728e90c8
+                  expression: 'find(/HikvisionTemplates/camid.status[{#NVRID},online,{#DEVICEID}],,"like","false")=1'
+                  name: 'Камера {#DEVICEID} имя {#DEVICENAME} на регистраторе {#NVRID} отключилась'
+                  priority: HIGH
+          request_method: POST
+        -
+          uuid: e5d03dd0740b43efb07985579076b301
+          name: HDD
+          type: ZABBIX_ACTIVE
+          key: 'hddid.discovery[HDD]'
+          delay: 60m
+          lifetime: 1w
+          item_prototypes:
+            -
+              uuid: d6b970d0c49345e5994cfc7f535ff83c
+              name: '{#NVRID} Диск {#DEVICEID} (размер)'
+              type: ZABBIX_ACTIVE
+              key: 'hddid.status[{#NVRID},capacity,{#DEVICEID}]'
+              delay: 12h
+              history: 1w
+              trends: 1w
+              units: B
+              preprocessing:
+                -
+                  type: MULTIPLIER
+                  parameters:
+                    - '1048576'
+              request_method: POST
+            -
+              uuid: ea02d3405a2a4847a9ae92960b8b6bde
+              name: '{#NVRID} Диск {#DEVICEID} (статус)'
+              type: ZABBIX_ACTIVE
+              key: 'hddid.status[{#NVRID},status,{#DEVICEID}]'
+              delay: 12h
+              history: 1w
+              trends: '0'
+              value_type: TEXT
+              request_method: POST
+              trigger_prototypes:
+                -
+                  uuid: 7fd645dc2fc64fc4adfdbdd145caebac
+                  expression: 'find(/HikvisionTemplates/hddid.status[{#NVRID},status,{#DEVICEID}],,"like","error")=1'
+                  name: '{#NVRID} диск {#DEVICEID} ошибка'
+                  priority: HIGH
+                  description: 'Зарегистрирована ошибка на диске'
+                  manual_close: 'YES'
+                -
+                  uuid: 5a3de1b84e834c9a87a4d532b9443f7b
+                  expression: 'find(/HikvisionTemplates/hddid.status[{#NVRID},status,{#DEVICEID}],,"like","formating")=1'
+                  recovery_mode: NONE
+                  name: 'Диск {#DEVICEID} был отформатирован'
+                  priority: HIGH
+                  manual_close: 'YES'
+                -
+                  uuid: 1bdbbd5f17484812a6b60b4008a229b2
+                  expression: 'find(/HikvisionTemplates/hddid.status[{#NVRID},status,{#DEVICEID}],,"like","smartFailed")=1'
+                  recovery_mode: NONE
+                  name: 'На диске {#DEVICEID} ошибка S.M.A.R.T.'
+                  priority: HIGH
+                  description: 'Зарегистрирована ошибка S.M.A.R.T. на диске'
+                  manual_close: 'YES'
+          request_method: POST
+        -
+          uuid: 142718066c664ada8f4afb40aee5cb25
+          name: NVR
+          type: ZABBIX_ACTIVE
+          key: 'nvrid.discovery[NVR]'
+          delay: 60m
+          lifetime: 1w
+          item_prototypes:
+            -
+              uuid: b819971b07ca4707a3dcda68298cc22a
+              name: '{#NVRID} Имя'
+              type: ZABBIX_ACTIVE
+              key: 'nvrid.status[{#NVRID},deviceName]'
+              delay: 8h
+              history: 14d
+              trends: '0'
+              value_type: TEXT
+            -
+              uuid: d2f9f9f3c1484ac7a20063cf70bc4c3f
+              name: '{#NVRID} Тип устройства'
+              type: ZABBIX_ACTIVE
+              key: 'nvrid.status[{#NVRID},deviceType]'
+              delay: 8h
+              history: 14d
+              trends: '0'
+              value_type: TEXT
+            -
+              uuid: 668ce0b625d64f95bb4e22366065c7b3
+              name: '{#NVRID} Время работы'
+              type: ZABBIX_ACTIVE
+              key: 'nvrid.status[{#NVRID},deviceUpTime]'
+              delay: 1h
+              history: 14d
+              trends: 14d
+              units: s
+            -
+              uuid: 8289e5028a5a4337bbbed6181561620f
+              name: '{#NVRID} прошивка'
+              type: ZABBIX_ACTIVE
+              key: 'nvrid.status[{#NVRID},firmwareVersion]'
+              delay: 8h
+              history: 1w
+              trends: '0'
+              value_type: TEXT
+            -
+              uuid: c17dcc46e5814ccd8d88e0d4ca1b8b26
+              name: '{#NVRID} модель'
+              type: ZABBIX_ACTIVE
+              key: 'nvrid.status[{#NVRID},model]'
+              delay: 8h
+              history: 14d
+              trends: '0'
+              value_type: TEXT
